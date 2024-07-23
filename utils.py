@@ -1,6 +1,7 @@
 import os
 import re
 
+
 def parse_m3u(file_path):
     media_extensions = ('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mpg')
 
@@ -58,10 +59,13 @@ def write_strm_files(entries, base_dir):
                 if match:
                     show_name, season, episode = match.groups()
                     season_dir = f"Season {int(season):02d}"
-                    safe_show_name = show_name.replace(':', '').replace('/', '_').replace('\\', '_').replace('?', '').replace('*', '')
+                    safe_show_name = show_name.replace(':', '').replace('/', '_').replace('\\', '_').replace('?',
+                                                                                                             '').replace(
+                        '*', '')
                     dir_path = os.path.join(base_dir, 'series', safe_show_name, season_dir)
                     os.makedirs(dir_path, exist_ok=True)
-                    safe_name = f"{safe_show_name} S{season} E{episode}".replace(':', '').replace('/', '_').replace('\\', '_').replace('?', '').replace('*', '')
+                    safe_name = f"{safe_show_name} S{season} E{episode}".replace(':', '').replace('/', '_').replace(
+                        '\\', '_').replace('?', '').replace('*', '')
                 else:
                     # Handle cases where season and episode are not correctly formatted
                     print(f"Warning: Could not parse series info for: {name}")
