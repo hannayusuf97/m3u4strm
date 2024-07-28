@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 *.m3u
+tv_channels_*
+Result_*
+process.log
 # Distribution / packaging
 .Python
 build/
