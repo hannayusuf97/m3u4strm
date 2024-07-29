@@ -4,6 +4,8 @@ __pycache__/
 *$py.class
 
 # C extensions
+test
+test*
 *.so
 *.m3u
 tv_channels_*

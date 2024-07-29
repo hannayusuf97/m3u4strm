@@ -4,6 +4,7 @@ from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from log_and_progress import log_message, update_progress
 
+
 def parse_m3u(file_path):
     media_extensions = ('.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mpg')
 
@@ -34,12 +35,13 @@ def parse_m3u(file_path):
                 title = current_entry.get('title', '')
                 name = current_entry['name']
 
-                if 'Series' in title or re.search(r'\b[Ss][._-]?(\d{1,3})[._-]?E(\d{1,4})\b', name):
+                if 'Series' in title or re.search(r'\b[Ss][._-]?\s*(\d{1,3})[._-]?\s*E\s*(\d{1,4})\b', name):
                     series.append(current_entry)
                 else:
                     movies.append(current_entry)
 
     return movies, series
+
 
 def sanitize_filename(name):
     name = re.sub(r'[\\/*?:"<>|]', '', name).strip()
@@ -47,20 +49,22 @@ def sanitize_filename(name):
     name = name.replace('\t', '').replace('\n', '').strip().rstrip('. ')
     return name
 
+
 def remove_season_episode_info(name):
     name = re.sub(r'\b[Ss][._-]?(\d{1,3})[._-]?E(\d{1,4})\b', '', name)
     name = re.sub(r'\b[Ss][._-]?(\d{1,3})\b', '', name)
     return name.strip()
+
 
 def write_strm_file(entry, base_dir, file_type):
     if 'name' in entry and 'url' in entry:
         name = entry['name']
         title = entry.get('title', '')
 
-        is_series = re.search(r'\b[Ss][._-]?(\d{1,3})[._-]?E(\d{1,4})\b', name)
+        is_series = re.search(r'\b[Ss][._-]?\s*(\d{1,3})[._-]?\s*E\s*(\d{1,4})\b', name)
 
         if is_series or 'Series' in title:
-            match = re.search(r'^(.*?)(?:\s+\[.*\])?\s*[Ss][._-]?(\d{1,3})[._-]?E(\d{1,4})$', name, re.IGNORECASE)
+            match = re.search(r'^(.*?)(?:\s*\[.*\])?\s*[Ss][._-]?\s*(\d{1,3})[._-]?\s*E(\d{1,4})$', name, re.IGNORECASE)
             if match:
                 show_name, season, episode = match.groups()
                 season = season.zfill(2)
@@ -87,6 +91,7 @@ def write_strm_file(entry, base_dir, file_type):
         with open(file_path, 'w', encoding='utf-8') as strm_file:
             strm_file.write(entry['url'])
 
+
 def write_strm_files(entries, base_dir, file_type, max_workers):
     total_entries = len(entries)
 
@@ -95,17 +100,3 @@ def write_strm_files(entries, base_dir, file_type, max_workers):
             futures = [executor.submit(write_strm_file, entry, base_dir, file_type) for entry in entries]
             for future in as_completed(futures):
                 pbar.update(1)
-
-def main():
-    m3u_file_path = 'path_to_your_m3u_file.m3u'
-    output_dir = 'path_to_output_directory'
-
-    max_workers = max(1, os.cpu_count() - 2)
-
-    movies, series = parse_m3u(m3u_file_path)
-
-    write_strm_files(movies, output_dir, 'movies', max_workers)
-    write_strm_files(series, output_dir, 'series', max_workers)
-
-if __name__ == '__main__':
-    main()
